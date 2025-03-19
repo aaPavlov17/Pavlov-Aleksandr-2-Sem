@@ -1,0 +1,14 @@
+server:
+  port: 8080
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+management:
+  endpoints:
+    web:
+      base-path: /admin/actuator
+      exposure:
+        include: "*"
+        exclude: shutdown
