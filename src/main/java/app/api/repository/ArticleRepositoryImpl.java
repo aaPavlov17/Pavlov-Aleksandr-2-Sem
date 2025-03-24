@@ -4,18 +4,40 @@ import app.api.entity.Article;
 import app.api.entity.ArticleId;
 import lombok.Data;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Data
 @Repository
 public class ArticleRepositoryImpl implements ArticleRepository {
 
+  RestTemplate restTemplate;
+  WebClient webClient;
+
   private List<Article> articles;
 
-  public ArticleRepositoryImpl() {
+  public ArticleRepositoryImpl(RestTemplate restTemplate, WebClient webClient) {
+    this.restTemplate = restTemplate;
+    this.webClient = webClient;
     this.articles = new ArrayList<>();
+  }
+
+  public String fetchRandomUrl() {
+    String url = "http://youtube.com/video/" + new Random().nextInt(10000);
+    return restTemplate.getForObject(url, String.class);
+  }
+
+  public String fetchRandomDataBlocking() {
+    String url = "http://youtube.com/video/" + new Random().nextInt(10000);
+    return webClient.get()
+        .uri(url)
+        .retrieve()
+        .bodyToMono(String.class)
+        .block();
   }
 
   @Override

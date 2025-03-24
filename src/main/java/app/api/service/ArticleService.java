@@ -1,14 +1,21 @@
 package app.api.service;
 
 import app.api.entity.Article;
-import app.api.entity.ArticleId;
+import app.api.exception.CustomRetryException;
 import app.api.repository.ArticleRepositoryImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
+@EnableAsync
 public class ArticleService {
 
   public ArticleRepositoryImpl articleRepository;
@@ -18,14 +25,15 @@ public class ArticleService {
     this.articleRepository = articleRepository;
   }
 
-  public Article addArticle(Article article) {
+  @Async
+  public CompletableFuture<Article> addArticle(Article article) {
     Article addedArticle = articleRepository.addArticle(article);
     if (addedArticle != null) {
       log.info("Added article: {}", addedArticle);
     } else {
       log.info("Article {} already exists", article.getName());
     }
-    return addedArticle;
+    return CompletableFuture.completedFuture(addedArticle);
   }
 
   public Article updateArticle(Article article) {
@@ -38,6 +46,12 @@ public class ArticleService {
     return updatedArticle;
   }
 
+  //Обеспечение удаления статьи
+  @Retryable(
+      value = CustomRetryException.class,
+      maxAttempts = 5,
+      backoff = @Backoff(delay = 10000)
+  )
   public Article deleteArticle(int id) {
     Article deletedArticle = articleRepository.deleteArticle(id);
     if (deletedArticle != null) {

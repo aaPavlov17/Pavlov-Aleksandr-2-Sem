@@ -1,5 +1,9 @@
 server:
   port: 8080
+  tomcat:
+    threads:
+      min-spare: 10
+      max:  200
 springdoc:
   api-docs:
     path: /v3/api-docs
@@ -12,3 +16,15 @@ management:
       exposure:
         include: "*"
         exclude: shutdown
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=600s
+resilience4j:
+  ratelimiter:
+    instances:
+      apiRateLimiter:
+        limit-for-period: 5
+        limit-refresh-period: 1s
+        timeout-duration: 500ms
