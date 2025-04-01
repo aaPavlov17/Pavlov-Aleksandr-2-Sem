@@ -1,18 +1,43 @@
 package app.api.entity;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.proxy.HibernateProxy;
 
-@Data
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
+@Entity
+@Table(name = "categories")
+@Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "Category", description = "Сущность категории")
+@Builder
 public class Category {
 
-  @Schema(description = "Уникальный идентификатор", example = "123")
+  @EmbeddedId
   private CategoryId id;
 
-  @Schema(description = "Название категории", example = "ML")
   private String name;
 
+  @ManyToMany(mappedBy = "categories")
+  private Set<Article> articles = new HashSet<>();
+
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null) return false;
+    Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != oEffectiveClass) return false;
+    Category category = (Category) o;
+    return getId() != null && Objects.equals(getId(), category.getId());
+  }
+
+  @Override
+  public final int hashCode() {
+    return Objects.hash(id);
+  }
 }

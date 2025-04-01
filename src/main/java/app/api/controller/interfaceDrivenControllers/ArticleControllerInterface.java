@@ -18,7 +18,7 @@ public interface ArticleControllerInterface {
   @ApiResponse(responseCode = "200", description = "Статья добавлена")
   @ApiResponse(responseCode = "500", description = "Ошибка сервера")
   @PostMapping("/add_article")
-  ResponseEntity<CompletableFuture<Article>> addArticle(
+  ResponseEntity<Article> addArticle(
       @Parameter(description = "Статья", required = true)
       @RequestBody Article article
   );
@@ -27,9 +27,9 @@ public interface ArticleControllerInterface {
   @ApiResponse(responseCode = "200", description = "Статья удалена")
   @ApiResponse(responseCode = "500", description = "Ошибка сервера")
   @DeleteMapping("/delete_article/{id}")
-  ResponseEntity<Article> deleteArticle(
+  ResponseEntity<?> deleteArticle(
       @Parameter(description = "Id статьи", required = true)
-      @PathVariable int id
+      @PathVariable Long id
   );
 
   @Operation(summary = "Найти стаью по id")
@@ -38,7 +38,7 @@ public interface ArticleControllerInterface {
   @GetMapping("/get_article/{id}")
   ResponseEntity<Article> getArticle(
       @Parameter(description = "Id статьи", required = true)
-      @PathVariable int id
+      @PathVariable Long id
   );
 
   @Operation(summary = "Заменить стаью")
@@ -46,15 +46,6 @@ public interface ArticleControllerInterface {
   @ApiResponse(responseCode = "500", description = "Ошибка сервера")
   @PutMapping("/put_article")
   ResponseEntity<Article> putArticle(
-      @Parameter(description = "Статья", required = true)
-      @RequestBody Article article
-  );
-
-  @Operation(summary = "Обновить стаью")
-  @ApiResponse(responseCode = "200", description = "Статья обновлена")
-  @ApiResponse(responseCode = "500", description = "Ошибка сервера")
-  @PatchMapping("/patch_article")
-  ResponseEntity<Article> patchArticle(
       @Parameter(description = "Статья", required = true)
       @RequestBody Article article
   );

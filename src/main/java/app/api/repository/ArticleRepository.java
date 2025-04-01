@@ -2,16 +2,8 @@ package app.api.repository;
 
 import app.api.entity.Article;
 import app.api.entity.ArticleId;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ArticleRepository {
+public interface ArticleRepository extends JpaRepository<Article, ArticleId> {
 
-  Article addArticle(Article article);
-
-  Article updateArticle(Article article);
-
-  Article deleteArticle(int id);
-
-  Article findArticleById(int id);
-
-  Article patchArticle(Article article);
 }

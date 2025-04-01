@@ -1,23 +1,49 @@
 package app.api.entity;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.proxy.HibernateProxy;
 
-@Data
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
+@Entity
+@Table(name = "articles")
+@Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "Article", description = "Сущность пользователя")
+@Builder
 public class Article {
 
-    @Schema(description = "Имя Статьи", example = "ML")
     String name;
 
-    @Schema(description = "Уникальный идентификатор", example = "123")
+    @EmbeddedId
     ArticleId id;
 
-    @Schema(description = "Url ссылка статьи", example = "https://habr.com/ru/articles/814061/")
     String url;
 
-    @Schema(description = "Уникальный идентификатор категории статьи", example = "234")
-    CategoryId categoryId;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "categories_of_article",
+        joinColumns = @JoinColumn(name = "article_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private Set<Category> categories = new HashSet<>();
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) return false;
+        Article article = (Article) o;
+        return getId() != null && Objects.equals(getId(), article.getId());
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(id);
+    }
 }

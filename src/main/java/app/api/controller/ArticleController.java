@@ -24,25 +24,25 @@ public class ArticleController implements ArticleControllerInterface {
   }
 
   @Override
-  public ResponseEntity<CompletableFuture<Article>> addArticle(Article article) {
+  public ResponseEntity<Article> addArticle(Article article) {
     return rateLimiter.executeSupplier(() -> {
       log.info("Adding article: {}", article.getName());
-      CompletableFuture<Article> addedArticle = articlesService.addArticle(article);
+      Article addedArticle = articlesService.saveArticle(article);
       return new ResponseEntity<>(addedArticle, HttpStatus.CREATED);
     });
   }
 
   @Override
-  public ResponseEntity<Article> deleteArticle(int id) {
+  public ResponseEntity<?> deleteArticle(Long id) {
     return rateLimiter.executeSupplier(() -> {
       log.info("Deleting article with id: {}", id);
-      Article deletedArticle = articlesService.deleteArticle(id);
-      return new ResponseEntity<>(deletedArticle, HttpStatus.OK);
+      articlesService.deleteArticle(id);
+      return new ResponseEntity<>(HttpStatus.OK);
     });
   }
 
   @Override
-  public ResponseEntity<Article> getArticle(int id) {
+  public ResponseEntity<Article> getArticle(Long id) {
     return rateLimiter.executeSupplier(() -> {
       log.info("Getting article with id: {}", id);
       Article article = articlesService.findArticleById(id);
@@ -55,15 +55,6 @@ public class ArticleController implements ArticleControllerInterface {
     return rateLimiter.executeSupplier(() -> {
       log.info("Updating article: {}", article.getName());
       Article updatedArticle = articlesService.updateArticle(article);
-      return new ResponseEntity<>(updatedArticle, HttpStatus.OK);
-    });
-  }
-
-  @Override
-  public ResponseEntity<Article> patchArticle(Article article) {
-    return rateLimiter.executeSupplier(() -> {
-      log.info("Patching article with id: {}", article.getId().getId());
-      Article updatedArticle = articlesService.patchArticle(article);
       return new ResponseEntity<>(updatedArticle, HttpStatus.OK);
     });
   }

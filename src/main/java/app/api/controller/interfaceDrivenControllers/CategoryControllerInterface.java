@@ -20,7 +20,7 @@ public interface CategoryControllerInterface {
   @GetMapping("/get_category/{id}")
   ResponseEntity<Category> getCategoryById(
       @Parameter(description = "ID категории", required = true)
-      @PathVariable int id
+      @PathVariable Long id
   );
 
   @Operation(summary = "Добавить категорию")
@@ -38,9 +38,9 @@ public interface CategoryControllerInterface {
   @ApiResponse(responseCode = "404", description = "Категория не найдена")
   @ApiResponse(responseCode = "500", description = "Ошибка сервера")
   @DeleteMapping("delete_category/{id}")
-  ResponseEntity<Category> deleteCategory(
+  ResponseEntity<?> deleteCategory(
       @Parameter(description = "ID категории", required = true)
-      @PathVariable int id
+      @PathVariable Long id
   );
 
   @Operation(summary = "Заменить категорию")
@@ -50,16 +50,6 @@ public interface CategoryControllerInterface {
   @PutMapping("/put_category")
   ResponseEntity<Category> putCategory(
       @Parameter(description = "Категория", required = true)
-      @RequestBody Category category
-  );
-
-  @Operation(summary = "Обновить категорию")
-  @ApiResponse(responseCode = "200", description = "Категория заменена")
-  @ApiResponse(responseCode = "404", description = "Категория не найдена")
-  @ApiResponse(responseCode = "500", description = "Ошибка сервера")
-  @PatchMapping("/patch_category")
-  ResponseEntity<Category> patchCategory(
-      @Parameter(name = "Категория", required = true)
       @RequestBody Category category
   );
 }

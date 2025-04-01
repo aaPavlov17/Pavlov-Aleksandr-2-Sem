@@ -21,7 +21,7 @@ public class CategoryController implements CategoryControllerInterface {
   }
 
   @Override
-  public ResponseEntity<Category> getCategoryById(int id) {
+  public ResponseEntity<Category> getCategoryById(Long id) {
     log.info("Getting category");
     return circuitBreaker.executeSupplier(() -> {
       try {
@@ -51,13 +51,13 @@ public class CategoryController implements CategoryControllerInterface {
   }
 
   @Override
-  public ResponseEntity<Category> deleteCategory(int id) {
+  public ResponseEntity<?> deleteCategory(Long id) {
     log.info("Deleting category");
     return circuitBreaker.executeSupplier(() -> {
       try {
-        Category deletedCategory = categoryService.deleteCategory(id);
-        log.info("Category {} deleted", deletedCategory.getName());
-        return new ResponseEntity<>(deletedCategory, HttpStatus.OK);
+        categoryService.deleteCategory(id);
+        log.info("Category deleted");
+        return new ResponseEntity<>(HttpStatus.OK);
       } catch (Exception e) {
         log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -73,21 +73,6 @@ public class CategoryController implements CategoryControllerInterface {
         Category updatedCategory = categoryService.updateCategory(category);
         log.info("Category {} updated", updatedCategory.getName());
         return new ResponseEntity<>(updatedCategory, HttpStatus.OK);
-      } catch (Exception e) {
-        log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-      }
-    });
-  }
-
-  @Override
-  public ResponseEntity<Category> patchCategory(Category category) {
-    log.info("Patching category");
-    return circuitBreaker.executeSupplier(() -> {
-      try {
-        Category patchedCategory = categoryService.patchCategory(category);
-        log.info("Category {} patched", patchedCategory.getName());
-        return new ResponseEntity<>(patchedCategory, HttpStatus.OK);
       } catch (Exception e) {
         log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
