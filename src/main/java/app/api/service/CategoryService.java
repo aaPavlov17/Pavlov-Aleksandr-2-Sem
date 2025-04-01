@@ -1,7 +1,9 @@
 package app.api.service;
 
 import app.api.entity.Category;
-import app.api.repository.CategoryRepositoryImpl;
+import app.api.entity.CategoryId;
+import app.api.repository.CategoryRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -14,79 +16,33 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
-@EnableCaching
 public class CategoryService {
 
-  private CategoryRepositoryImpl categoryRepository;
-
-  private final ConcurrentHashMap<String, Boolean> executedOperations = new ConcurrentHashMap<>();
+  private CategoryRepository categoryRepository;
 
   @Autowired
-  public CategoryService(CategoryRepositoryImpl categoryRepository) {
+  public CategoryService(CategoryRepository categoryRepository) {
     this.categoryRepository = categoryRepository;
   }
 
-  @CachePut(value = "categories", key = "#category.id")
+  @Transactional
   public Category addCategory(Category category) {
-    Category addedCategory = categoryRepository.addCategory(category);
-    if (addedCategory != null) {
-      log.info("Category {} has been added", addedCategory.getName());
-    } else {
-      log.info("Category {} already exists", category.getName());
-    }
-    return addedCategory;
+    return categoryRepository.save(category);
   }
 
-  @CachePut(value = "categories", key = "#category.id")
+  @Transactional
   public Category updateCategory(Category category) {
-    Category updatedCategory = categoryRepository.updateCategory(category);
-    if (updatedCategory != null) {
-      log.info("Category {} has been updated", updatedCategory.getName());
-    } else {
-      log.info("Category {} does not exist", category.getName());
-    }
-    return updatedCategory;
+    categoryRepository.deleteById(category.getId());
+    return categoryRepository.save(category);
   }
 
-  @CacheEvict(value = "categories", key = "#id")
-  public Category deleteCategory(int id) {
-    Category deletedCategory = categoryRepository.deleteCategory(id);
-    if (deletedCategory != null) {
-      log.info("Category {} has been deleted", deletedCategory.getName());
-    } else {
-      log.info("Category with id {} does not exist", id);
-    }
-    return deletedCategory;
+  @Transactional
+  public void deleteCategory(Long id) {
+    categoryRepository.deleteById(new CategoryId(id));
   }
 
-  @Cacheable(value = "categories", key = "#id")
-  public Category getCategoryById(int id) {
-    Category category = categoryRepository.findCategoryById(id);
-    if (category != null) {
-      log.info("Category with id {} has been found", id);
-    } else {
-      log.info("Category with id {} does not exist", id);
-    }
-    return category;
-  }
-
-  @CachePut(value = "categories", key = "#category.id")
-  public Category patchCategory(Category category) {
-    Category updatedCategory = categoryRepository.patchCategory(category);
-    if (updatedCategory != null) {
-      log.info("Category with id {} has been patched", category.getId().getId());
-    } else {
-      log.info("Category with id {} does not exist", category.getId().getId());
-    }
-    return updatedCategory;
-  }
-
-  public void exactlyOnceOperationExample(String operationId) {
-    if (executedOperations.putIfAbsent(operationId, true) != null) {
-      log.warn("Операция {} уже была выполнена. Пропускаем.", operationId);
-      return;
-    }
-    //логика
-    log.info("Выполняем операцию {} ровно один раз", operationId);
+  @Transactional
+  public Category getCategoryById(Long id) {
+    return categoryRepository.findById(new CategoryId(id)).orElse(null);
   }
 }
