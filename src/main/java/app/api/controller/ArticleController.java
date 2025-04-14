@@ -3,6 +3,7 @@ package app.api.controller;
 import app.api.entity.Article;
 import app.api.service.ArticleService;
 import app.api.controller.interfaceDrivenControllers.ArticleControllerInterface;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,12 @@ public class ArticleController implements ArticleControllerInterface {
   public ResponseEntity<Article> addArticle(Article article) {
     return rateLimiter.executeSupplier(() -> {
       log.info("Adding article: {}", article.getName());
-      Article addedArticle = articlesService.saveArticle(article);
+      Article addedArticle = null;
+      try {
+        addedArticle = articlesService.saveArticle(article);
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
       return new ResponseEntity<>(addedArticle, HttpStatus.CREATED);
     });
   }

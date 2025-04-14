@@ -34,6 +34,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  kafka:
+    bootstrap-servers: localhost:29093
+
 resilience4j:
   ratelimiter:
     instances:
@@ -41,3 +44,5 @@ resilience4j:
         limit-for-period: 5
         limit-refresh-period: 1s
         timeout-duration: 500ms
+
+topic-to-send-message: audit-topic
