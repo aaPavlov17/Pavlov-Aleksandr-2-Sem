@@ -1,5 +1,6 @@
 package app.api.service;
 
+import app.api.dto.DtoMessage;
 import com.datastax.oss.driver.api.core.cql.Row;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,7 @@ class UserAuditServiceTest {
   void shouldSuccessfullyInsertUserAction() {
     UUID userId = UUID.randomUUID();
 
-    userAuditService.insertUserAction(userId, UserAuditService.Action.DROP_DATABASE);
+    userAuditService.insertUserAction(new DtoMessage(userId, "INSERT", "some message"));
 
     List<Row> result = userAuditService.getUserAudit(userId);
 
@@ -55,7 +56,7 @@ class UserAuditServiceTest {
   public void testGetUserById() {
 
     assertThrows(RuntimeException.class, () -> {
-      userAuditService.insertUserAction(null, null);
+      userAuditService.insertUserAction(null);
     });
   }
 

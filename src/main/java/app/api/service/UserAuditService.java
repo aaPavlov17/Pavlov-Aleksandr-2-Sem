@@ -1,5 +1,6 @@
 package app.api.service;
 
+import app.api.dto.DtoMessage;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
@@ -18,11 +19,7 @@ public class UserAuditService {
   @Autowired
   private CqlSession session;
 
-  enum Action {
-    SELECT, UPDATE, INSERT, DELETE, DROP_DATABASE
-  }
-
-  public void insertUserAction(UUID userId, Action action) {
+  public void insertUserAction(DtoMessage message) {
 
     PreparedStatement preparedStatement = session.prepare(
         "INSERT INTO my_keyspace.user_audit (user_id, event_time, event_type, event_details) " +
@@ -30,10 +27,10 @@ public class UserAuditService {
     );
 
     BoundStatement boundStatement = preparedStatement.bind(
-        userId,
+        message.getUserId(),
         java.time.Instant.now(),
-        action.toString(),
-        "User did action " + action.toString()
+        message.getEvent(),
+        message.getMessage()
     );
 
     session.execute(boundStatement);
